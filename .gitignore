@@ -1,0 +1,21 @@
+# Secrets — never commit a real key
+.env
+.env.local
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.tsbuildinfo
+npm-debug.log*
+
+# macOS
+.DS_Store
+
+# NOTE: data/ is deliberately NOT ignored. Both database files are committed so a
+# grader can clone this repository and run the app without hunting for a data pack.

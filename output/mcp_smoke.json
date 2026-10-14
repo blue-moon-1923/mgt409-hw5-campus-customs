@@ -1,0 +1,672 @@
+{
+  "what_this_is": "Evidence that the three Campus Customs MCP tools were called from Claude Code (the vibe coder) over the MCP connection defined in .mcp.json, and that every value they returned matches data/campus_customs_new.db.",
+  "mcp_server": {
+    "name": "campus-customs",
+    "config_file": ".mcp.json",
+    "transport": "stdio",
+    "command": "mcp_server/.venv/bin/python",
+    "args": [
+      "mcp_server/mcp_server.py"
+    ],
+    "server_info_from_handshake": {
+      "name": "campus-customs",
+      "version": "4.1.0"
+    },
+    "connection_status_in_session": "connected",
+    "tool_count": 3,
+    "tools_advertised": [
+      "get_ticket_context",
+      "check_stock_and_restock_options",
+      "get_cash_position"
+    ]
+  },
+  "database_under_test": "data/campus_customs_new.db",
+  "shop_date": "2026-08-31",
+  "how_values_were_checked": "Each call's output was compared field by field against a direct read-only SQL read of the same database file. Date arithmetic is reproduced in SQL from desk.date_today, not from the real calendar.",
+  "summary": {
+    "tools_tested": 3,
+    "calls_made": 6,
+    "tickets_covered": [
+      101,
+      102,
+      103
+    ],
+    "fields_verified": 32,
+    "fields_matching": 32,
+    "all_match": true
+  },
+  "calls": [
+    {
+      "check": 1,
+      "tool": "get_ticket_context",
+      "mcp_name": "mcp__campus-customs__get_ticket_context",
+      "tickets_covered": [
+        101
+      ],
+      "prompt_to_vibe_coder": "Call the campus-customs MCP tool get_ticket_context for ticket 101.",
+      "arguments": {
+        "ticket_id": 101
+      },
+      "tool_output": {
+        "found": true,
+        "shop_date": "2026-08-31",
+        "ticket": {
+          "id": 101,
+          "type": "customer_order",
+          "requester": "Tauhid Zaman",
+          "subject": "Bulldog tee",
+          "sku": "CC-TEE-WHITE",
+          "size": "S",
+          "qty": 1,
+          "lease_id": null,
+          "invoice_id": 501,
+          "status": "open",
+          "notes": "Needs a tee in size S.",
+          "created_at": "2026-08-31T09:15:00-04:00"
+        },
+        "linked": {
+          "inventory": {
+            "sku": "CC-TEE-WHITE",
+            "name": "Classic Bulldog Tee",
+            "size": "S",
+            "qty": 0,
+            "location": "Aisle B"
+          },
+          "pricing": {
+            "sku": "CC-TEE-WHITE",
+            "unit_cost": 8,
+            "list_price": 28,
+            "margin_per_unit": 20
+          },
+          "invoice": {
+            "id": 501,
+            "vendor_id": 1,
+            "amount": 840,
+            "due_date": "2026-08-28",
+            "status": "open",
+            "description": "Rush reprint CC-TEE-WHITE S",
+            "days_overdue": 3,
+            "is_overdue": true,
+            "vendor": {
+              "id": 1,
+              "name": "Bulldog Print Co",
+              "specialty": "apparel reprint",
+              "lead_days": 5
+            }
+          }
+        }
+      },
+      "verified_against_database": [
+        {
+          "field": "shop_date",
+          "tool_value": "2026-08-31",
+          "database_query": "SELECT date_today FROM desk",
+          "database_value": "2026-08-31",
+          "match": true
+        },
+        {
+          "field": "ticket.invoice_id",
+          "tool_value": 501,
+          "database_query": "SELECT invoice_id FROM tickets WHERE id=101",
+          "database_value": 501,
+          "match": true
+        },
+        {
+          "field": "linked.inventory.qty",
+          "tool_value": 0,
+          "database_query": "SELECT qty FROM inventory WHERE sku='CC-TEE-WHITE' AND size='S'",
+          "database_value": 0,
+          "match": true
+        },
+        {
+          "field": "linked.invoice.amount",
+          "tool_value": 840,
+          "database_query": "SELECT amount FROM invoices WHERE id=501",
+          "database_value": 840.0,
+          "match": true
+        },
+        {
+          "field": "linked.invoice.days_overdue",
+          "tool_value": 3,
+          "database_query": "julianday(desk.date_today) - julianday(invoices.due_date) for invoice 501",
+          "database_value": 3,
+          "match": true
+        },
+        {
+          "field": "linked.invoice.vendor.name",
+          "tool_value": "Bulldog Print Co",
+          "database_query": "SELECT name FROM vendors WHERE id=1",
+          "database_value": "Bulldog Print Co",
+          "match": true
+        },
+        {
+          "field": "linked.pricing.margin_per_unit",
+          "tool_value": 20,
+          "database_query": "SELECT list_price-unit_cost FROM pricing WHERE sku='CC-TEE-WHITE'",
+          "database_value": 20.0,
+          "match": true
+        }
+      ]
+    },
+    {
+      "check": 2,
+      "tool": "get_ticket_context",
+      "mcp_name": "mcp__campus-customs__get_ticket_context",
+      "tickets_covered": [
+        102
+      ],
+      "prompt_to_vibe_coder": "Call get_ticket_context for ticket 102.",
+      "arguments": {
+        "ticket_id": 102
+      },
+      "tool_output": {
+        "found": true,
+        "shop_date": "2026-08-31",
+        "ticket": {
+          "id": 102,
+          "type": "rent_notice",
+          "requester": "Elm City Properties",
+          "subject": "Rent due",
+          "sku": null,
+          "size": null,
+          "qty": null,
+          "lease_id": 1,
+          "invoice_id": null,
+          "status": "open",
+          "notes": "Email: shop rent due in 2 days.",
+          "created_at": "2026-08-31T11:05:00-04:00"
+        },
+        "linked": {
+          "lease": {
+            "id": 1,
+            "space_name": "Chapel Street shop",
+            "landlord": "Elm City Properties",
+            "monthly_rent": 2400,
+            "next_due": "2026-09-02",
+            "notes": null,
+            "days_until_due": 2,
+            "is_overdue": false
+          }
+        }
+      },
+      "verified_against_database": [
+        {
+          "field": "linked.lease.monthly_rent",
+          "tool_value": 2400,
+          "database_query": "SELECT monthly_rent FROM leases WHERE id=1",
+          "database_value": 2400.0,
+          "match": true
+        },
+        {
+          "field": "linked.lease.next_due",
+          "tool_value": "2026-09-02",
+          "database_query": "SELECT next_due FROM leases WHERE id=1",
+          "database_value": "2026-09-02",
+          "match": true
+        },
+        {
+          "field": "linked.lease.days_until_due",
+          "tool_value": 2,
+          "database_query": "julianday(leases.next_due) - julianday(desk.date_today)",
+          "database_value": 2,
+          "match": true
+        }
+      ]
+    },
+    {
+      "check": 3,
+      "tool": "get_ticket_context",
+      "mcp_name": "mcp__campus-customs__get_ticket_context",
+      "tickets_covered": [
+        103
+      ],
+      "prompt_to_vibe_coder": "Call get_ticket_context for ticket 103.",
+      "arguments": {
+        "ticket_id": 103
+      },
+      "tool_output": {
+        "found": true,
+        "shop_date": "2026-08-31",
+        "ticket": {
+          "id": 103,
+          "type": "price_override",
+          "requester": "Yale AI Club",
+          "subject": "Bulk hoodie discount",
+          "sku": "CC-HOOD-NAVY",
+          "size": "M",
+          "qty": 20,
+          "lease_id": null,
+          "invoice_id": null,
+          "status": "open",
+          "notes": "Student org wants 20 hoodies, size M, asking for a bulk discount.",
+          "created_at": "2026-08-31T16:55:00-04:00"
+        },
+        "linked": {
+          "inventory": {
+            "sku": "CC-HOOD-NAVY",
+            "name": "Basic Hoodie Big Yale",
+            "size": "M",
+            "qty": 8,
+            "location": "Aisle A"
+          },
+          "pricing": {
+            "sku": "CC-HOOD-NAVY",
+            "unit_cost": 22,
+            "list_price": 58,
+            "margin_per_unit": 36
+          }
+        }
+      },
+      "verified_against_database": [
+        {
+          "field": "linked.inventory.qty",
+          "tool_value": 8,
+          "database_query": "SELECT qty FROM inventory WHERE sku='CC-HOOD-NAVY' AND size='M'",
+          "database_value": 8,
+          "match": true
+        },
+        {
+          "field": "linked.pricing.unit_cost",
+          "tool_value": 22,
+          "database_query": "SELECT unit_cost FROM pricing WHERE sku='CC-HOOD-NAVY'",
+          "database_value": 22.0,
+          "match": true
+        },
+        {
+          "field": "linked.pricing.margin_per_unit",
+          "tool_value": 36,
+          "database_query": "SELECT list_price-unit_cost FROM pricing WHERE sku='CC-HOOD-NAVY'",
+          "database_value": 36.0,
+          "match": true
+        }
+      ]
+    },
+    {
+      "check": 4,
+      "tool": "check_stock_and_restock_options",
+      "mcp_name": "mcp__campus-customs__check_stock_and_restock_options",
+      "tickets_covered": [
+        101
+      ],
+      "prompt_to_vibe_coder": "Call check_stock_and_restock_options for CC-TEE-WHITE size S, qty 1 (ticket 101).",
+      "arguments": {
+        "sku": "CC-TEE-WHITE",
+        "size": "S",
+        "qty_needed": 1
+      },
+      "tool_output": {
+        "shop_date": "2026-08-31",
+        "sku": "CC-TEE-WHITE",
+        "size": "S",
+        "product_name": "Classic Bulldog Tee",
+        "location": "Aisle B",
+        "qty_on_hand": 0,
+        "qty_needed": 1,
+        "shortfall": 1,
+        "can_fulfil_now": false,
+        "other_sizes_in_stock": [
+          {
+            "size": "L",
+            "qty": 3
+          },
+          {
+            "size": "M",
+            "qty": 5
+          },
+          {
+            "size": "XL",
+            "qty": 2
+          }
+        ],
+        "unit_cost": 8,
+        "restock_cost": 8,
+        "vendors": [
+          {
+            "vendor_id": 1,
+            "name": "Bulldog Print Co",
+            "specialty": "apparel reprint",
+            "can_make_this_product": true,
+            "match_reason": "Specialty 'apparel reprint' covers this product.",
+            "lead_days": 5,
+            "earliest_arrival": "2026-09-05",
+            "blocked_by_unpaid_invoice": true,
+            "blocking_invoice": {
+              "id": 501,
+              "amount": 840,
+              "due_date": "2026-08-28",
+              "status": "open"
+            },
+            "blocked_reason": "Invoice 501 for $840.00 is open. This vendor will not ship until it is paid.",
+            "usable_now": false
+          },
+          {
+            "vendor_id": 2,
+            "name": "Elm City Gifts",
+            "specialty": "mugs and small goods",
+            "can_make_this_product": false,
+            "match_reason": "Specialty 'mugs and small goods' does not cover this product (needs apparel).",
+            "lead_days": 3,
+            "earliest_arrival": "2026-09-03",
+            "blocked_by_unpaid_invoice": false,
+            "usable_now": false
+          },
+          {
+            "vendor_id": 3,
+            "name": "QuickShip CT",
+            "specialty": "local courier",
+            "can_make_this_product": false,
+            "match_reason": "Courier \u2014 delivers goods, does not make them.",
+            "lead_days": 1,
+            "earliest_arrival": "2026-09-01",
+            "blocked_by_unpaid_invoice": false,
+            "usable_now": false
+          }
+        ],
+        "note": "The only vendor(s) who can make this product are blocked by an unpaid invoice. The invoice has to be settled before a restock can be ordered."
+      },
+      "verified_against_database": [
+        {
+          "field": "qty_on_hand",
+          "tool_value": 0,
+          "database_query": "SELECT qty FROM inventory WHERE sku='CC-TEE-WHITE' AND size='S'",
+          "database_value": 0,
+          "match": true
+        },
+        {
+          "field": "shortfall",
+          "tool_value": 1,
+          "database_query": "qty_needed(1) - qty_on_hand",
+          "database_value": 1,
+          "match": true
+        },
+        {
+          "field": "unit_cost",
+          "tool_value": 8,
+          "database_query": "SELECT unit_cost FROM pricing WHERE sku='CC-TEE-WHITE'",
+          "database_value": 8.0,
+          "match": true
+        },
+        {
+          "field": "restock_cost",
+          "tool_value": 8,
+          "database_query": "shortfall(1) * unit_cost",
+          "database_value": 8.0,
+          "match": true
+        },
+        {
+          "field": "vendors[0].blocked_by_unpaid_invoice",
+          "tool_value": true,
+          "database_query": "EXISTS(SELECT 1 FROM invoices WHERE vendor_id=1 AND status!='paid')",
+          "database_value": true,
+          "match": true
+        },
+        {
+          "field": "vendors[0].lead_days",
+          "tool_value": 5,
+          "database_query": "SELECT lead_days FROM vendors WHERE id=1",
+          "database_value": 5,
+          "match": true
+        },
+        {
+          "field": "vendors[0].earliest_arrival",
+          "tool_value": "2026-09-05",
+          "database_query": "date(desk.date_today, '+5 days')",
+          "database_value": "2026-09-05",
+          "match": true
+        },
+        {
+          "field": "other_sizes_in_stock",
+          "tool_value": [
+            {
+              "size": "L",
+              "qty": 3
+            },
+            {
+              "size": "M",
+              "qty": 5
+            },
+            {
+              "size": "XL",
+              "qty": 2
+            }
+          ],
+          "database_query": "SELECT size,qty FROM inventory WHERE sku='CC-TEE-WHITE' AND size!='S' AND qty>0 ORDER BY size",
+          "database_value": [
+            {
+              "size": "L",
+              "qty": 3
+            },
+            {
+              "size": "M",
+              "qty": 5
+            },
+            {
+              "size": "XL",
+              "qty": 2
+            }
+          ],
+          "match": true
+        }
+      ]
+    },
+    {
+      "check": 5,
+      "tool": "check_stock_and_restock_options",
+      "mcp_name": "mcp__campus-customs__check_stock_and_restock_options",
+      "tickets_covered": [
+        103
+      ],
+      "prompt_to_vibe_coder": "Call check_stock_and_restock_options for CC-HOOD-NAVY size M, qty 20 (ticket 103).",
+      "arguments": {
+        "sku": "CC-HOOD-NAVY",
+        "size": "M",
+        "qty_needed": 20
+      },
+      "tool_output": {
+        "shop_date": "2026-08-31",
+        "sku": "CC-HOOD-NAVY",
+        "size": "M",
+        "product_name": "Basic Hoodie Big Yale",
+        "location": "Aisle A",
+        "qty_on_hand": 8,
+        "qty_needed": 20,
+        "shortfall": 12,
+        "can_fulfil_now": false,
+        "other_sizes_in_stock": [
+          {
+            "size": "L",
+            "qty": 14
+          },
+          {
+            "size": "S",
+            "qty": 4
+          },
+          {
+            "size": "XL",
+            "qty": 6
+          }
+        ],
+        "unit_cost": 22,
+        "restock_cost": 264,
+        "vendors": [
+          {
+            "vendor_id": 1,
+            "name": "Bulldog Print Co",
+            "specialty": "apparel reprint",
+            "can_make_this_product": true,
+            "match_reason": "Specialty 'apparel reprint' covers this product.",
+            "lead_days": 5,
+            "earliest_arrival": "2026-09-05",
+            "blocked_by_unpaid_invoice": true,
+            "blocking_invoice": {
+              "id": 501,
+              "amount": 840,
+              "due_date": "2026-08-28",
+              "status": "open"
+            },
+            "blocked_reason": "Invoice 501 for $840.00 is open. This vendor will not ship until it is paid.",
+            "usable_now": false
+          },
+          {
+            "vendor_id": 2,
+            "name": "Elm City Gifts",
+            "specialty": "mugs and small goods",
+            "can_make_this_product": false,
+            "match_reason": "Specialty 'mugs and small goods' does not cover this product (needs apparel).",
+            "lead_days": 3,
+            "earliest_arrival": "2026-09-03",
+            "blocked_by_unpaid_invoice": false,
+            "usable_now": false
+          },
+          {
+            "vendor_id": 3,
+            "name": "QuickShip CT",
+            "specialty": "local courier",
+            "can_make_this_product": false,
+            "match_reason": "Courier \u2014 delivers goods, does not make them.",
+            "lead_days": 1,
+            "earliest_arrival": "2026-09-01",
+            "blocked_by_unpaid_invoice": false,
+            "usable_now": false
+          }
+        ],
+        "note": "The only vendor(s) who can make this product are blocked by an unpaid invoice. The invoice has to be settled before a restock can be ordered."
+      },
+      "verified_against_database": [
+        {
+          "field": "qty_on_hand",
+          "tool_value": 8,
+          "database_query": "SELECT qty FROM inventory WHERE sku='CC-HOOD-NAVY' AND size='M'",
+          "database_value": 8,
+          "match": true
+        },
+        {
+          "field": "shortfall",
+          "tool_value": 12,
+          "database_query": "qty_needed(20) - qty_on_hand",
+          "database_value": 12,
+          "match": true
+        },
+        {
+          "field": "restock_cost",
+          "tool_value": 264,
+          "database_query": "shortfall(12) * unit_cost",
+          "database_value": 264.0,
+          "match": true
+        },
+        {
+          "field": "vendors[0].earliest_arrival",
+          "tool_value": "2026-09-05",
+          "database_query": "date(desk.date_today, '+5 days')",
+          "database_value": "2026-09-05",
+          "match": true
+        }
+      ]
+    },
+    {
+      "check": 6,
+      "tool": "get_cash_position",
+      "mcp_name": "mcp__campus-customs__get_cash_position",
+      "tickets_covered": [
+        102,
+        101,
+        103
+      ],
+      "prompt_to_vibe_coder": "Call get_cash_position.",
+      "arguments": {},
+      "tool_output": {
+        "shop_date": "2026-08-31",
+        "accounts": [
+          {
+            "name": "checking",
+            "balance": 3400,
+            "date": "2026-08-31"
+          }
+        ],
+        "total_cash": 3400,
+        "open_invoices": [
+          {
+            "id": 501,
+            "vendor_id": 1,
+            "vendor_name": "Bulldog Print Co",
+            "amount": 840,
+            "due_date": "2026-08-28",
+            "status": "open",
+            "description": "Rush reprint CC-TEE-WHITE S",
+            "days_overdue": 3,
+            "is_overdue": true
+          }
+        ],
+        "open_invoice_total": 840,
+        "leases": [
+          {
+            "id": 1,
+            "space_name": "Chapel Street shop",
+            "landlord": "Elm City Properties",
+            "monthly_rent": 2400,
+            "next_due": "2026-09-02",
+            "days_until_due": 2,
+            "is_overdue": false
+          }
+        ],
+        "rent_due_total": 2400,
+        "total_committed": 3240,
+        "cash_after_all_commitments": 160,
+        "covers_all_commitments": true,
+        "payments_recorded": [],
+        "note": "Cash only goes out in this shop; no revenue is modelled, so this balance can only fall. Any payment needs human approval and must not take an account below zero."
+      },
+      "verified_against_database": [
+        {
+          "field": "total_cash",
+          "tool_value": 3400,
+          "database_query": "SELECT SUM(balance) FROM cash_accounts",
+          "database_value": 3400.0,
+          "match": true
+        },
+        {
+          "field": "open_invoice_total",
+          "tool_value": 840,
+          "database_query": "SELECT COALESCE(SUM(amount),0) FROM invoices WHERE status!='paid'",
+          "database_value": 840.0,
+          "match": true
+        },
+        {
+          "field": "open_invoices[0].days_overdue",
+          "tool_value": 3,
+          "database_query": "julianday(desk.date_today) - julianday(invoices.due_date)",
+          "database_value": 3,
+          "match": true
+        },
+        {
+          "field": "rent_due_total",
+          "tool_value": 2400,
+          "database_query": "SELECT COALESCE(SUM(monthly_rent),0) FROM leases",
+          "database_value": 2400.0,
+          "match": true
+        },
+        {
+          "field": "total_committed",
+          "tool_value": 3240,
+          "database_query": "open invoices + rent",
+          "database_value": 3240.0,
+          "match": true
+        },
+        {
+          "field": "cash_after_all_commitments",
+          "tool_value": 160,
+          "database_query": "total cash - total committed",
+          "database_value": 160.0,
+          "match": true
+        },
+        {
+          "field": "payments_recorded",
+          "tool_value": [],
+          "database_query": "SELECT * FROM payments",
+          "database_value": [],
+          "match": true
+        }
+      ]
+    }
+  ]
+}
